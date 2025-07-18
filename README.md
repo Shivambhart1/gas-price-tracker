@@ -84,7 +84,3 @@ useGasStore.setState({
 ## 📌 Notes
 
 > Some values may return as `0` due to RPC availability or network inconsistencies. We rely on best-effort data accuracy across supported chains.
-
-## 📜 License
-
-MIT
