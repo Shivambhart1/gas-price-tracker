@@ -1,5 +1,5 @@
 
-import { WebSocketProvider, JsonRpcProvider } from "ethers";
+import { WebSocketProvider } from "ethers";
 
 export const testConnection = async () => {
   const ethProvider = new WebSocketProvider('https://eth-mainnet.g.alchemy.com/v2/Fe0mK1G6yPCmgzZDJM4OzjZGseAC0sCM');

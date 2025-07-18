@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import SendTxButton from "./SendTransaction";
 import { NETWORK_CONFIG, Networks } from "../constants";
@@ -50,7 +50,7 @@ const GasTable = () => {
     fetchGasPrice();
     const interval = setInterval(fetchGasPrice, 15000);
     return () => clearInterval(interval);
-  }, [isSimulation]);
+  }, [isSimulation, endpoint]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-50 to-indigo-100 p-4 sm:p-6 lg:p-8">

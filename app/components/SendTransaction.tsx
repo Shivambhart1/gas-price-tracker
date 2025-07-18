@@ -1,8 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { ethers } from "ethers"; 
-import toast from "react-hot-toast";
+import { useState } from "react";
 
 const SendTxButton = () => {
   const [from, setFrom] = useState("");

@@ -6,7 +6,7 @@ const RPCS = {
   arbitrum: "https://arb-mainnet.g.alchemy.com/v2/Fe0mK1G6yPCmgzZDJM4OzjZGseAC0sCM",
 };
 
-async function fetchRPCData(rpcUrl: string, method: string, params: any[] = []): Promise<any> {
+async function fetchRPCData(rpcUrl: string, method: string, params: unknown[] = []): Promise<unknown> {
   const response = await fetch(rpcUrl, {
     method: "POST",
     headers: {
@@ -24,21 +24,31 @@ async function fetchRPCData(rpcUrl: string, method: string, params: any[] = []):
   return data.result;
 }
 
+type BlockResponse = {
+  baseFeePerGas?: string;
+  [key: string]: unknown;
+};
+
+type FeeHistoryResponse = {
+  reward?: string[][];
+  [key: string]: unknown;
+};
+
 async function getNetworkGasData(rpcUrl: string) {
   try {
     const gasPrice = await fetchRPCData(rpcUrl, "eth_gasPrice");
     
-    const latestBlock = await fetchRPCData(rpcUrl, "eth_getBlockByNumber", ["latest", false]);
+    const latestBlock = await fetchRPCData(rpcUrl, "eth_getBlockByNumber", ["latest", false]) as BlockResponse;
     
     const feeHistory = await fetchRPCData(rpcUrl, "eth_feeHistory", [
       "0x1", 
       "latest",
       [50] 
-    ]);
+    ]) as FeeHistoryResponse;
 
-    const gasPriceWei = BigInt(gasPrice);
+    const gasPriceWei = BigInt(gasPrice as string);
     const baseFeeWei = latestBlock?.baseFeePerGas ? BigInt(latestBlock.baseFeePerGas) : BigInt(0);
-    const priorityFeeWei = feeHistory?.reward?.[0]?.[0] ? BigInt(feeHistory.reward[0][0]) : BigInt(0);
+    const priorityFeeWei = feeHistory?.reward?.[0]?.[0] ? BigInt(feeHistory.reward![0][0]) : BigInt(0);
     
     const maxFeeWei = baseFeeWei + priorityFeeWei + BigInt(2000000000); 
 
