@@ -55,10 +55,10 @@ const SendTxButton = () => {
         "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"
       );
       const data = await response.json();
-      return data.ethereum.usd; // Returns ETH price in USD
+      return data.ethereum.usd; 
     } catch (err) {
       console.error("Error fetching ETH price:", err);
-      return 2000; // Fallback price
+      return 2000; 
     }
   };
 
@@ -77,14 +77,13 @@ const SendTxButton = () => {
       }
 
       const gasLimit = 21000;
-      const gasPrice = parseFloat(gasPriceGwei) * 1e9; // Convert Gwei to wei
-      const fee = (gasPrice * gasLimit) / 1e18; // Calculate fee in ETH
+      const gasPrice = parseFloat(gasPriceGwei) * 1e9; 
+      const fee = (gasPrice * gasLimit) / 1e18; 
       setEstimatedFee(fee.toFixed(6));
 
-      // Fetch ETH price and calculate USD fee
       const ethPriceUSD = await fetchEthPrice();
       const feeUSD = fee * ethPriceUSD;
-      setEstimatedFeeUSD(feeUSD.toFixed(2)); // Round to 2 decimal places for USD
+      setEstimatedFeeUSD(feeUSD.toFixed(2)); 
     } catch (err) {
       console.error("Simulation error:", err);
     } finally {
