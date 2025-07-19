@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const SendTxButton = () => {
   const [from, setFrom] = useState("");
@@ -12,10 +12,32 @@ const SendTxButton = () => {
   const [isSimulating, setIsSimulating] = useState(false);
 
   const connectWallet = async () => {
-    setFrom("0x1234...5678");
-    setIsConnected(true);
-    console.log("Wallet connected!");
+    if (typeof window.ethereum !== "undefined") {
+      const accounts = await window.ethereum.request({
+        method: "eth_requestAccounts",
+      });
+      setFrom(accounts[0]);
+      setIsConnected(true);
+      localStorage.setItem("isConnected", "true");
+    } else {
+      alert("MetaMask not found");
+    }
   };
+  useEffect(() => {
+    const checkWalletConnection = async () => {
+      if (typeof window.ethereum !== "undefined") {
+        const accounts = await window.ethereum.request({
+          method: "eth_accounts",
+        });
+        if (accounts.length > 0) {
+          setFrom(accounts[0]);
+          setIsConnected(true);
+        }
+      }
+    };
+
+    checkWalletConnection();
+  }, []);
 
   const handleSimulate = async () => {
     try {
@@ -32,8 +54,8 @@ const SendTxButton = () => {
       }
 
       const gasLimit = 21000;
-      const gasPrice = parseFloat(gasPriceGwei) * 1e9; // Convert to wei
-      const fee = (gasPrice * gasLimit) / 1e18; // Convert to ETH
+      const gasPrice = parseFloat(gasPriceGwei) * 1e9;
+      const fee = (gasPrice * gasLimit) / 1e18;
       setEstimatedFee(fee.toFixed(6));
     } catch (err) {
       console.error("Simulation error:", err);
