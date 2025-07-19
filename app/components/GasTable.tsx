@@ -69,7 +69,7 @@ const GasTable = () => {
             <div className="flex items-center gap-3 mb-4">
               <button
                 onClick={() => useSimulationStore.getState().toggleSimulation()}
-                className="px-3 py-1 rounded-lg bg-indigo-600 text-white text-sm hover:bg-indigo-700"
+                className="px-3 py-1 rounded-lg bg-indigo-600 text-white text-sm hover:bg-indigo-700 cursor-pointer"
               >
                 Toggle Mode
               </button>

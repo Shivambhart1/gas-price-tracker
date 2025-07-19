@@ -2,12 +2,21 @@
 
 import { useEffect, useState } from "react";
 
+declare global {
+  interface Window {
+    ethereum?: {
+      request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+    };
+  }
+}
+
 const SendTxButton = () => {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [valueEth, setValueEth] = useState("");
   const [gasPriceGwei, setGasPriceGwei] = useState("");
   const [estimatedFee, setEstimatedFee] = useState("");
+  const [estimatedFeeUSD, setEstimatedFeeUSD] = useState("");
   const [isConnected, setIsConnected] = useState(false);
   const [isSimulating, setIsSimulating] = useState(false);
 
@@ -16,19 +25,20 @@ const SendTxButton = () => {
       const accounts = await window.ethereum.request({
         method: "eth_requestAccounts",
       });
-      setFrom(accounts[0]);
+      setFrom((accounts as string[])[0]);
       setIsConnected(true);
       localStorage.setItem("isConnected", "true");
     } else {
       alert("MetaMask not found");
     }
   };
+
   useEffect(() => {
     const checkWalletConnection = async () => {
       if (typeof window.ethereum !== "undefined") {
         const accounts = await window.ethereum.request({
           method: "eth_accounts",
-        });
+        }) as string[];
         if (accounts.length > 0) {
           setFrom(accounts[0]);
           setIsConnected(true);
@@ -38,6 +48,19 @@ const SendTxButton = () => {
 
     checkWalletConnection();
   }, []);
+
+  const fetchEthPrice = async () => {
+    try {
+      const response = await fetch(
+        "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"
+      );
+      const data = await response.json();
+      return data.ethereum.usd; // Returns ETH price in USD
+    } catch (err) {
+      console.error("Error fetching ETH price:", err);
+      return 2000; // Fallback price
+    }
+  };
 
   const handleSimulate = async () => {
     try {
@@ -54,9 +77,14 @@ const SendTxButton = () => {
       }
 
       const gasLimit = 21000;
-      const gasPrice = parseFloat(gasPriceGwei) * 1e9;
-      const fee = (gasPrice * gasLimit) / 1e18;
+      const gasPrice = parseFloat(gasPriceGwei) * 1e9; // Convert Gwei to wei
+      const fee = (gasPrice * gasLimit) / 1e18; // Calculate fee in ETH
       setEstimatedFee(fee.toFixed(6));
+
+      // Fetch ETH price and calculate USD fee
+      const ethPriceUSD = await fetchEthPrice();
+      const feeUSD = fee * ethPriceUSD;
+      setEstimatedFeeUSD(feeUSD.toFixed(2)); // Round to 2 decimal places for USD
     } catch (err) {
       console.error("Simulation error:", err);
     } finally {
@@ -113,7 +141,7 @@ const SendTxButton = () => {
         ) : (
           <div className="bg-green-50 border border-green-200 rounded-xl p-3">
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></	div>
               <span className="text-sm font-medium text-green-800">
                 Connected
               </span>
@@ -213,6 +241,11 @@ const SendTxButton = () => {
             <p className="text-lg font-bold text-green-700">
               {estimatedFee} ETH
             </p>
+            {estimatedFeeUSD && (
+              <p className="text-sm font-medium text-green-600 mt-1">
+                ~${estimatedFeeUSD} USD
+              </p>
+            )}
           </div>
         )}
       </div>
